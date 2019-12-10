@@ -7,15 +7,16 @@ type Clock interface {
 	Reset()
 }
 
-type ClockNone struct {}
-func (cn ClockNone) Now() time.Time {
+type _ClockNone struct {}
+func (cn _ClockNone) Now() time.Time {
 	return time.Time{}
 }
-func (cn ClockNone) Reset() {}
+func (cn _ClockNone) Reset() {}
+var ClockNone = _ClockNone{}
 
-type ClockSimple struct {}
-func (cs ClockSimple) Now() time.Time {
+type _ClockSimple struct {}
+func (cs _ClockSimple) Now() time.Time {
 	return time.Now()
 }
-
-func (cs ClockSimple) Reset() {}
+func (cs _ClockSimple) Reset() {}
+var ClockSimple = _ClockSimple{}
