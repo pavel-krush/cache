@@ -63,7 +63,30 @@ func (q *Queue) Unshift(key string) {
 }
 
 func (q *Queue) moveToFront(key string) {
+	keyIndex, ok := q.keys[key]
+	if !ok {
+		return
+	}
 
+	q.swap(q.head, keyIndex)
+}
+
+func (q *Queue) swap(e1, e2 int) {
+	if e1 == e2 {
+		return
+	}
+	tmp := q.list[e1]
+
+	q.list[q.list[e1].left].right = e2
+	q.list[q.list[e1].right].left = e2
+	q.list[q.list[e2].left].right = e1
+	q.list[q.list[e2].right].left = e1
+
+	q.list[e1].left = q.list[e2].left
+	q.list[e1].right = q.list[e2].right
+
+	q.list[e2].left = tmp.left
+	q.list[e2].right = tmp.right
 }
 
 func (q *Queue) _dump() {

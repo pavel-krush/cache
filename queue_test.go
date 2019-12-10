@@ -12,4 +12,6 @@ func TestQueue(t *testing.T) {
 	q.Unshift("four")
 	q.Unshift("five")
 	q._dump()
+	q.swap(q.head, 4)
+	q._dump()
 }
