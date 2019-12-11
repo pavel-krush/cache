@@ -10,6 +10,8 @@ type LRUCache interface {
 	Delete(key string)
 	Get(key string) (interface{}, bool)
 	TTL(key string) (time.Duration, bool)
+	Expired() int
+	Evicted() int
 }
 
 type LRU struct {
@@ -87,6 +89,14 @@ func (lru *LRU) TTL(key string) (time.Duration, bool) {
 		return 0, false
 	}
 	return item.expireAt.Sub(lru.clock.Now()), true
+}
+
+func (lru *LRU) Expired() int {
+	return lru.expired
+}
+
+func (lru *LRU) Evicted() int {
+	return lru.evicted
 }
 
 // remove the oldest element

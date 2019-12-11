@@ -46,3 +46,11 @@ func (slru *SyncLRU) TTL(key string) (time.Duration, bool) {
 	defer slru.mu.Unlock()
 	return slru.LRU.TTL(key)
 }
+
+func (slru *SyncLRU) Expired() int {
+	return slru.LRU.expired
+}
+
+func (slru *SyncLRU) Evicted() int {
+	return slru.LRU.evicted
+}
