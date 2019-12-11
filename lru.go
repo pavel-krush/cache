@@ -12,6 +12,7 @@ type LRUCache interface {
 	TTL(key string) (time.Duration, bool)
 	Expired() int
 	Evicted() int
+	UpdateTTL(update bool)
 }
 
 type LRU struct {
@@ -22,8 +23,9 @@ type LRU struct {
 	evicted int
 	expired int
 
-	capacity int
-	storage  map[string]Item
+	capacity  int
+	updateTTL bool
+	storage   map[string]*Item
 }
 
 type Item struct {
@@ -37,7 +39,7 @@ func NewLRU(capacity int, ttl time.Duration) *LRU {
 		clock:          ClockSimple,
 		expirationList: newList(capacity),
 		capacity:       capacity,
-		storage:        make(map[string]Item),
+		storage:        make(map[string]*Item),
 	}
 }
 
@@ -51,7 +53,7 @@ func (lru *LRU) Exists(key string) bool {
 func (lru *LRU) Set(key string, value interface{}) {
 	lru.expire()
 
-	item := Item{data: value, expireAt: time.Now().Add(lru.ttl)}
+	item := &Item{data: value, expireAt: time.Now().Add(lru.ttl)}
 	lru.storage[key] = item
 
 	// remove excess item
@@ -73,6 +75,10 @@ func (lru *LRU) Get(key string) (interface{}, bool) {
 	item, found := lru.storage[key]
 	if !found {
 		return nil, false
+	}
+
+	if lru.updateTTL {
+		item.expireAt = time.Now().Add(lru.ttl)
 	}
 
 	return item.data, true
@@ -132,4 +138,8 @@ func (lru *LRU) expire() {
 
 func (lru *LRU) SetClock(clock Clock) {
 	lru.clock = clock
+}
+
+func (lru *LRU) UpdateTTL(update bool) {
+	lru.updateTTL = update
 }

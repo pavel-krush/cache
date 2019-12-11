@@ -48,13 +48,25 @@ func (slru *SyncLRU) TTL(key string) (time.Duration, bool) {
 }
 
 func (slru *SyncLRU) Expired() int {
-	return slru.LRU.expired
+	slru.mu.Lock()
+	defer slru.mu.Unlock()
+	return slru.LRU.Expired()
 }
 
 func (slru *SyncLRU) Evicted() int {
-	return slru.LRU.evicted
+	slru.mu.Lock()
+	defer slru.mu.Unlock()
+	return slru.LRU.Evicted()
 }
 
 func (slru *SyncLRU) SetClock(clock Clock) {
-	slru.LRU.clock = clock
+	slru.mu.Lock()
+	defer slru.mu.Unlock()
+	slru.LRU.SetClock(clock)
+}
+
+func (slru *SyncLRU) UpdateTTL(update bool) {
+	slru.mu.Lock()
+	defer slru.mu.Unlock()
+	slru.UpdateTTL(update)
 }
