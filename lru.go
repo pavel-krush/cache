@@ -31,10 +31,10 @@ type Item struct {
 	expireAt time.Time
 }
 
-func NewLRU(capacity int, ttl time.Duration, clock Clock) *LRU {
+func NewLRU(capacity int, ttl time.Duration) *LRU {
 	return &LRU{
 		ttl:            ttl,
-		clock:          clock,
+		clock:          ClockSimple,
 		expirationList: newList(capacity),
 		capacity:       capacity,
 		storage:        make(map[string]Item),
@@ -128,4 +128,8 @@ func (lru *LRU) expire() {
 		delete(lru.storage, oldestKey)
 		lru.expired++
 	}
+}
+
+func (lru *LRU) SetClock(clock Clock) {
+	lru.clock = clock
 }

@@ -10,9 +10,9 @@ type SyncLRU struct {
 	mu *sync.Mutex
 }
 
-func NewSyncLRU(capacity int, ttl time.Duration, clock Clock) *SyncLRU {
+func NewSyncLRU(capacity int, ttl time.Duration) *SyncLRU {
 	return &SyncLRU{
-		LRU: *NewLRU(capacity, ttl, clock),
+		LRU: *NewLRU(capacity, ttl),
 		mu:  &sync.Mutex{},
 	}
 }
@@ -53,4 +53,8 @@ func (slru *SyncLRU) Expired() int {
 
 func (slru *SyncLRU) Evicted() int {
 	return slru.LRU.evicted
+}
+
+func (slru *SyncLRU) SetClock(clock Clock) {
+	slru.LRU.clock = clock
 }
