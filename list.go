@@ -1,34 +1,34 @@
 package cache
 
-type List struct {
+type l struct {
 	capacity int
 	keys     map[string]int
-	list     []ListItem
+	list     []listItem
 	// pointer to current head. it always valid except the case when tail == 0. this means list is empty
 	head int
 	// pointer to the next free element
 	tail int
 }
 
-type ListItem struct {
+type listItem struct {
 	left, right int
 	key         string
 }
 
-func NewList(capacity int) *List {
-	ret := &List{
+func newList(capacity int) *l {
+	ret := &l{
 		capacity: capacity,
 		keys:     make(map[string]int),
-		list:     make([]ListItem, capacity),
+		list:     make([]listItem, capacity),
 	}
 	return ret
 }
 
-func (q *List) Size() int {
+func (q *l) size() int {
 	return q.tail
 }
 
-func (q *List) Insert(key string) {
+func (q *l) insert(key string) {
 	if _, ok := q.keys[key]; ok {
 		q.moveToFront(key)
 		return
@@ -38,7 +38,7 @@ func (q *List) Insert(key string) {
 		panic("list full")
 	}
 
-	item := ListItem{
+	item := listItem{
 		left:  q.list[q.head].left,
 		right: q.head,
 		key:   key,
@@ -58,7 +58,7 @@ func (q *List) Insert(key string) {
 	q.tail++
 }
 
-func (q *List) Delete(key string) {
+func (q *l) delete(key string) {
 	index, ok := q.keys[key]
 	if !ok {
 		return
@@ -91,24 +91,24 @@ func (q *List) Delete(key string) {
 		q.head = index
 	}
 
-	// q.list[q.tail] = ListItem{}
+	// q.list[q.tail] = listItem{}
 }
 
-func (q *List) moveToFront(key string) {
-	q.Delete(key)
-	q.Insert(key)
+func (q *l) moveToFront(key string) {
+	q.delete(key)
+	q.insert(key)
 }
 
-func (q *List) Pop() (string, bool) {
+func (q *l) pop() (string, bool) {
 	if q.tail == 0 {
 		return "", false
 	}
 	key := q.list[q.list[q.head].left].key
-	q.Delete(key)
+	q.delete(key)
 	return key, true
 }
 
-func (q *List) Peek() (string, bool) {
+func (q *l) peek() (string, bool) {
 	if q.tail == 0 {
 		return "", false
 	}

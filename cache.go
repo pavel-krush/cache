@@ -9,7 +9,7 @@ type Cache struct {
 	mu             *sync.Mutex
 	ttl            time.Duration
 	clock          Clock
-	expirationList *List
+	expirationList *l
 
 	evicted int
 	expired int
@@ -28,7 +28,7 @@ func NewCache(capacity int, ttl time.Duration, clock Clock) *Cache {
 		mu:             &sync.Mutex{},
 		ttl:            ttl,
 		clock:          clock,
-		expirationList: NewList(capacity),
+		expirationList: newList(capacity),
 		capacity:       capacity,
 		storage:        make(map[string]Item),
 	}
@@ -58,14 +58,14 @@ func (c *Cache) Set(key string, value interface{}) {
 		c.evict()
 	}
 
-	c.expirationList.Insert(key)
+	c.expirationList.insert(key)
 }
 
 func (c *Cache) Delete(key string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.expirationList.Delete(key)
+	c.expirationList.delete(key)
 	delete(c.storage, key)
 }
 
@@ -101,7 +101,7 @@ func (c *Cache) TTL(key string) (time.Duration, bool) {
 
 // remove the oldest element
 func (c *Cache) evict() {
-	key, evicted := c.expirationList.Pop()
+	key, evicted := c.expirationList.pop()
 	if evicted {
 		c.evicted++
 		delete(c.storage, key)
@@ -114,7 +114,7 @@ func (c *Cache) expire() {
 		return
 	}
 	for {
-		oldestKey, peeked := c.expirationList.Peek()
+		oldestKey, peeked := c.expirationList.peek()
 		if !peeked {
 			break
 		}
@@ -124,7 +124,7 @@ func (c *Cache) expire() {
 		if !item.expireAt.Before(now) {
 			break
 		}
-		c.expirationList.Pop()
+		c.expirationList.pop()
 		delete(c.storage, oldestKey)
 		c.expired++
 	}

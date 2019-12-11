@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func queueDump(q *List) {
+func queueDump(q *l) {
 	var elements []string
 	if q.tail == 0 {
 		elements = append(elements, "queue: <empty>")
@@ -29,7 +29,7 @@ func queueDump(q *List) {
 	_, _ = fmt.Fprintf(os.Stderr, strings.Join(elements, "\n"))
 }
 
-func queueKeys(q *List) []string {
+func queueKeys(q *l) []string {
 	var ret []string
 	if q.tail == 0 {
 		return ret
@@ -61,7 +61,7 @@ type queueTestCase struct {
 }
 
 func TestQueue(t *testing.T) {
-	q := NewList(10)
+	q := newList(10)
 
 	testcases := []queueTestCase{
 		{op: opAdd, what: "one", elements: []string{"one"}},
@@ -77,9 +77,9 @@ func TestQueue(t *testing.T) {
 
 	for _, testcase := range testcases {
 		if testcase.op == opAdd {
-			q.Insert(testcase.what)
+			q.insert(testcase.what)
 		} else if testcase.op == opDelete {
-			q.Delete(testcase.what)
+			q.delete(testcase.what)
 		} else {
 			panic("unknown testcase operator")
 		}
