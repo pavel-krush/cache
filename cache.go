@@ -92,7 +92,7 @@ func (c *Cache) TTL(key string) (time.Duration, bool) {
 		return 1<<63 - 1, true
 	}
 
-		item, found := c.storage[key]
+	item, found := c.storage[key]
 	if !found {
 		return 0, false
 	}
