@@ -79,6 +79,7 @@ func (lru *LRU) Get(key string) (interface{}, bool) {
 
 	if lru.updateTTL {
 		item.expireAt = time.Now().Add(lru.ttl)
+		lru.expirationList.moveToFront(key)
 	}
 
 	return item.data, true
