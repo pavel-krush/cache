@@ -68,5 +68,17 @@ func (slru *SyncLRU) SetClock(clock Clock) {
 func (slru *SyncLRU) UpdateTTL(update bool) {
 	slru.mu.Lock()
 	defer slru.mu.Unlock()
-	slru.UpdateTTL(update)
+	slru.LRU.UpdateTTL(update)
+}
+
+func (slru *SyncLRU) OnEvict(callback func (key string)) {
+	slru.mu.Lock()
+	defer slru.mu.Unlock()
+	slru.LRU.OnEvict(callback)
+}
+
+func (slru *SyncLRU) OnExpire(callback func (key string)) {
+	slru.mu.Lock()
+	defer slru.mu.Unlock()
+	slru.LRU.OnExpire(callback)
 }

@@ -13,6 +13,9 @@ type LRUCache interface {
 	Expired() int
 	Evicted() int
 	UpdateTTL(update bool)
+
+	OnEvict(func(key string))
+	OnExpire(func(key string))
 }
 
 type LRU struct {
@@ -26,6 +29,9 @@ type LRU struct {
 	capacity  int
 	updateTTL bool
 	storage   map[string]*Item
+
+	onEvict func (key string)
+	onExpire func (key string)
 }
 
 type Item struct {
@@ -112,6 +118,10 @@ func (lru *LRU) evict() {
 	if evicted {
 		lru.evicted++
 		delete(lru.storage, key)
+
+		if lru.onEvict != nil {
+			lru.onEvict(key)
+		}
 	}
 }
 
@@ -134,6 +144,10 @@ func (lru *LRU) expire() {
 		lru.expirationList.pop()
 		delete(lru.storage, oldestKey)
 		lru.expired++
+
+		if lru.onExpire != nil {
+			lru.onExpire(oldestKey)
+		}
 	}
 }
 
@@ -143,4 +157,12 @@ func (lru *LRU) SetClock(clock Clock) {
 
 func (lru *LRU) UpdateTTL(update bool) {
 	lru.updateTTL = update
+}
+
+func (lru *LRU) OnEvict(callback func (key string)) {
+	lru.onEvict = callback
+}
+
+func (lru *LRU) OnExpire(callback func (key string)) {
+	lru.onExpire = callback
 }
