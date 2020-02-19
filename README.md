@@ -19,8 +19,8 @@ Interface
 
 ```go
 
-func NewLRU(capacity int, ttl time.Duration) *LRU
-func NewSyncLRU(capacity int, ttl time.Duration) *SyncLRU
+func NewLRU(capacity int, ttl time.Duration) LRUCache
+func NewSyncLRU(capacity int, ttl time.Duration) LRUCache
 
 type LRUCache interface {
 	Exists(key string) bool // check whether key exists in cache

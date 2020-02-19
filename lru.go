@@ -39,7 +39,7 @@ type Item struct {
 	expireAt time.Time
 }
 
-func NewLRU(capacity int, ttl time.Duration) *LRU {
+func NewLRU(capacity int, ttl time.Duration) LRUCache {
 	return &LRU{
 		ttl:            ttl,
 		clock:          ClockSimple,
@@ -149,10 +149,6 @@ func (lru *LRU) expire() {
 			lru.onExpire(oldestKey)
 		}
 	}
-}
-
-func (lru *LRU) SetClock(clock Clock) {
-	lru.clock = clock
 }
 
 func (lru *LRU) UpdateTTL(update bool) {
