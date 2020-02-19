@@ -7,7 +7,7 @@ import (
 
 type SyncLRU struct {
 	lru LRUCache
-	mu *sync.Mutex
+	mu  *sync.Mutex
 }
 
 func NewSyncLRU(capacity int, ttl time.Duration) LRUCache {
@@ -65,13 +65,13 @@ func (slru *SyncLRU) UpdateTTL(update bool) {
 	slru.lru.UpdateTTL(update)
 }
 
-func (slru *SyncLRU) OnEvict(callback func (key string)) {
+func (slru *SyncLRU) OnEvict(callback func(key string)) {
 	slru.mu.Lock()
 	defer slru.mu.Unlock()
 	slru.lru.OnEvict(callback)
 }
 
-func (slru *SyncLRU) OnExpire(callback func (key string)) {
+func (slru *SyncLRU) OnExpire(callback func(key string)) {
 	slru.mu.Lock()
 	defer slru.mu.Unlock()
 	slru.lru.OnExpire(callback)

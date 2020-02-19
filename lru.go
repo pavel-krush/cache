@@ -30,8 +30,8 @@ type LRU struct {
 	updateTTL bool
 	storage   map[string]*Item
 
-	onEvict func (key string)
-	onExpire func (key string)
+	onEvict  func(key string)
+	onExpire func(key string)
 }
 
 type Item struct {
@@ -155,10 +155,10 @@ func (lru *LRU) UpdateTTL(update bool) {
 	lru.updateTTL = update
 }
 
-func (lru *LRU) OnEvict(callback func (key string)) {
+func (lru *LRU) OnEvict(callback func(key string)) {
 	lru.onEvict = callback
 }
 
-func (lru *LRU) OnExpire(callback func (key string)) {
+func (lru *LRU) OnExpire(callback func(key string)) {
 	lru.onExpire = callback
 }
