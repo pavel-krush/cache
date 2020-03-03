@@ -23,6 +23,7 @@ func NewLRU(capacity int, ttl time.Duration) LRUCache
 func NewSyncLRU(capacity int, ttl time.Duration) LRUCache
 
 type LRUCache interface {
+	SetClock(clock Clock) // change clock
 	Exists(key string) bool // check whether key exists in cache
 	Set(key string, value interface{}) // set key-value pair
 	Delete(key string) // delete key from cache
@@ -56,6 +57,8 @@ BenchmarkSyncLRUNoExpiration-8   	11962401	        99.1 ns/op
 Clock
 -----
 There are three types of clock:
-- ClockNone - Used for non-expiration cache
-- ClockSimple - High precision clock. It uses time.Now() on each Get()
-- DiscreteClock - Not as precise as ClockSimple, but significantly faster. Refreshes current time once in 500ms. Default Clock.
+- ClockNone - Used for non-expiration cache. Constructor: `NewClockNone()`
+- ClockSimple - High precision clock. It uses time.Now() on each Get(). Constructor: `NewClockSimple()`
+- DiscreteClock - Not as precise as ClockSimple, but significantly faster. Refreshes current time once in 500ms. Default Clock. Constructor: `NewClockDiscrete(time.Duration)`
+
+Clock can be changed via SetClock Method.
