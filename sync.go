@@ -19,44 +19,47 @@ func NewSyncLRU(capacity int, ttl time.Duration) LRUCache {
 
 func (slru *SyncLRU) SetClock(clock Clock) {
 	slru.mu.Lock()
-	defer slru.mu.Unlock()
 	slru.lru.SetClock(clock)
+	slru.mu.Unlock()
 }
 
 func (slru *SyncLRU) Exists(key string) bool {
 	slru.mu.Lock()
-	defer slru.mu.Unlock()
-	return slru.lru.Exists(key)
+	ret := slru.lru.Exists(key)
+	slru.mu.Unlock()
+	return ret
 }
 
 func (slru *SyncLRU) Set(key string, value interface{}) {
 	slru.mu.Lock()
-	defer slru.mu.Unlock()
 	slru.lru.Set(key, value)
+	slru.mu.Unlock()
 }
 
 func (slru *SyncLRU) Delete(key string) {
 	slru.mu.Lock()
-	defer slru.mu.Unlock()
 	slru.lru.Delete(key)
+	slru.mu.Unlock()
 }
 
 func (slru *SyncLRU) Get(key string) (interface{}, bool) {
 	slru.mu.Lock()
-	defer slru.mu.Unlock()
-	return slru.lru.Get(key)
+	val, ok := slru.lru.Get(key)
+	slru.mu.Unlock()
+	return val, ok
 }
 
 func (slru *SyncLRU) TTL(key string) (time.Duration, bool) {
 	slru.mu.Lock()
-	defer slru.mu.Unlock()
-	return slru.lru.TTL(key)
+	val, ok := slru.lru.TTL(key)
+	slru.mu.Unlock()
+	return val, ok
 }
 
 func (slru *SyncLRU) Expired() int {
 	slru.mu.Lock()
-	defer slru.mu.Unlock()
 	return slru.lru.Expired()
+	slru.mu.Unlock()
 }
 
 func (slru *SyncLRU) Evicted() int {
