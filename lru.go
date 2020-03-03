@@ -5,6 +5,7 @@ import (
 )
 
 type LRUCache interface {
+	SetClock(clock Clock)
 	Exists(key string) bool
 	Set(key string, value interface{})
 	Delete(key string)
@@ -39,14 +40,27 @@ type Item struct {
 	expireAt time.Time
 }
 
+var DefaultClockConstructor = NewClockSimple
+
 func NewLRU(capacity int, ttl time.Duration) LRUCache {
-	return &LRU{
+	ret := &LRU{
 		ttl:            ttl,
-		clock:          ClockSimple,
 		expirationList: newList(capacity),
 		capacity:       capacity,
 		storage:        make(map[string]*Item),
 	}
+
+	if ttl == 0 {
+		ret.SetClock(DefaultClockConstructor())
+	} else {
+		ret.SetClock(NewClockDiscrete(0))
+	}
+
+	return ret
+}
+
+func (lru *LRU) SetClock(clock Clock) {
+	lru.clock = clock
 }
 
 func (lru *LRU) Exists(key string) bool {
@@ -63,7 +77,7 @@ func (lru *LRU) Set(key string, value interface{}) {
 	lru.storage[key] = item
 
 	// remove excess item
-	if len(lru.storage) >= lru.capacity {
+	if len(lru.storage) > lru.capacity {
 		lru.evict()
 	}
 
@@ -93,10 +107,6 @@ func (lru *LRU) Get(key string) (interface{}, bool) {
 
 // get TTL on key
 func (lru *LRU) TTL(key string) (time.Duration, bool) {
-	if lru.clock == ClockNone {
-		return 1<<63 - 1, true
-	}
-
 	item, found := lru.storage[key]
 	if !found {
 		return 0, false
@@ -127,9 +137,6 @@ func (lru *LRU) evict() {
 
 // remove all expired elements
 func (lru *LRU) expire() {
-	if lru.clock == ClockNone {
-		return
-	}
 	for {
 		oldestKey, peeked := lru.expirationList.peek()
 		if !peeked {

@@ -48,7 +48,14 @@ Benchmarks
 
 Benchmark example for my MacBook Pro (13-inch, 2019), 2,4 GHz Quad-Core Intel Core i5:
 ```text
-BenchmarkMapNoExpiration-8       	34207971	        41.0 ns/op
-BenchmarkLRUNoExpiration-8       	10686421	       106 ns/op
-BenchmarkSyncLRUNoExpiration-8   	 8420463	       149 ns/op
+BenchmarkMapNoExpiration-8       	30545750	        36.7 ns/op
+BenchmarkLRUNoExpiration-8       	17854893	        67.1 ns/op
+BenchmarkSyncLRUNoExpiration-8   	11962401	        99.1 ns/op
 ```
+
+Clock
+-----
+There are three types of clock:
+- ClockNone - Used for non-expiration cache
+- ClockSimple - High precision clock. It uses time.Now() on each Get()
+- DiscreteClock - Not as precise as ClockSimple, but significantly faster. Refreshes current time once in 500ms. Default Clock.

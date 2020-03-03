@@ -48,7 +48,7 @@ func benchmarkLru(b *testing.B, cache LRUCache) {
 	}
 
 	for i := 0; i < accessKeysSize; i++ {
-		accessKeys = append(accessKeys, keys[rand.Intn(len(keys))])
+		accessKeys[i] = keys[rand.Intn(len(keys))]
 	}
 
 	b.ResetTimer()

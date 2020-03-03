@@ -17,6 +17,12 @@ func NewSyncLRU(capacity int, ttl time.Duration) LRUCache {
 	}
 }
 
+func (slru *SyncLRU) SetClock(clock Clock) {
+	slru.mu.Lock()
+	defer slru.mu.Unlock()
+	slru.lru.SetClock(clock)
+}
+
 func (slru *SyncLRU) Exists(key string) bool {
 	slru.mu.Lock()
 	defer slru.mu.Unlock()
