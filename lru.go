@@ -4,6 +4,13 @@ import (
 	"time"
 )
 
+type Stats struct {
+	Evicted int
+	Expired int
+	Hits int
+	Misses int
+}
+
 type LRUCache interface {
 	SetClock(clock Clock)
 	Exists(key string) bool
@@ -11,8 +18,7 @@ type LRUCache interface {
 	Delete(key string)
 	Get(key string) (interface{}, bool)
 	TTL(key string) (time.Duration, bool)
-	Expired() int
-	Evicted() int
+	GetStats() Stats
 	UpdateTTL(update bool)
 
 	OnEvict(func(key string))
@@ -24,8 +30,7 @@ type LRU struct {
 	clock          Clock
 	expirationList *l
 
-	evicted int
-	expired int
+	stats Stats
 
 	capacity  int
 	updateTTL bool
@@ -65,7 +70,10 @@ func (lru *LRU) SetClock(clock Clock) {
 
 func (lru *LRU) Exists(key string) bool {
 	if _, ok := lru.storage[key]; ok {
+		lru.stats.Hits++
 		return true
+	} else {
+		lru.stats.Misses++
 	}
 	return false
 }
@@ -93,7 +101,10 @@ func (lru *LRU) Get(key string) (interface{}, bool) {
 	lru.expire()
 
 	item, found := lru.storage[key]
-	if !found {
+	if found {
+		lru.stats.Hits++
+	} else {
+		lru.stats.Misses++
 		return nil, false
 	}
 
@@ -108,25 +119,24 @@ func (lru *LRU) Get(key string) (interface{}, bool) {
 // get TTL on key
 func (lru *LRU) TTL(key string) (time.Duration, bool) {
 	item, found := lru.storage[key]
-	if !found {
+	if found {
+		lru.stats.Hits++
+	} else {
+		lru.stats.Misses++
 		return 0, false
 	}
 	return item.expireAt.Sub(lru.clock.Now()), true
 }
 
-func (lru *LRU) Expired() int {
-	return lru.expired
-}
-
-func (lru *LRU) Evicted() int {
-	return lru.evicted
+func (lru *LRU) GetStats() Stats {
+	return lru.stats
 }
 
 // remove the oldest element
 func (lru *LRU) evict() {
 	key, evicted := lru.expirationList.pop()
 	if evicted {
-		lru.evicted++
+		lru.stats.Evicted++
 		delete(lru.storage, key)
 
 		if lru.onEvict != nil {
@@ -150,7 +160,7 @@ func (lru *LRU) expire() {
 		}
 		lru.expirationList.pop()
 		delete(lru.storage, oldestKey)
-		lru.expired++
+		lru.stats.Expired++
 
 		if lru.onExpire != nil {
 			lru.onExpire(oldestKey)

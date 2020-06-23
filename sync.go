@@ -56,16 +56,11 @@ func (slru *SyncLRU) TTL(key string) (time.Duration, bool) {
 	return val, ok
 }
 
-func (slru *SyncLRU) Expired() int {
+func (slru *SyncLRU) GetStats() Stats {
 	slru.mu.Lock()
-	return slru.lru.Expired()
+	ret := slru.lru.GetStats()
 	slru.mu.Unlock()
-}
-
-func (slru *SyncLRU) Evicted() int {
-	slru.mu.Lock()
-	defer slru.mu.Unlock()
-	return slru.lru.Evicted()
+	return ret
 }
 
 func (slru *SyncLRU) UpdateTTL(update bool) {
