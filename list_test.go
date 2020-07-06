@@ -1,33 +1,8 @@
 package cache
 
 import (
-	"fmt"
-	"os"
-	"strings"
 	"testing"
 )
-
-func queueDump(q *l) {
-	var elements []string
-	if q.tail == 0 {
-		elements = append(elements, "queue: <empty>")
-	} else {
-		elements = append(elements, fmt.Sprintf("queue: <head %d, tail %d>", q.head, q.tail))
-
-		ptr := q.head
-		for {
-			item := q.list[ptr]
-			elements = append(elements, fmt.Sprintf("  % 2d: % 2d %s % 2d", ptr, item.left, item.key, item.right))
-
-			ptr = q.list[ptr].right
-			if ptr == q.head {
-				break
-			}
-		}
-	}
-	elements = append(elements, "")
-	_, _ = fmt.Fprintf(os.Stderr, strings.Join(elements, "\n"))
-}
 
 func queueKeys(q *l) []string {
 	var ret []string
@@ -35,12 +10,12 @@ func queueKeys(q *l) []string {
 		return ret
 	}
 
-	ptr := q.head
+	ptr := 0
 	for {
 		item := q.list[ptr]
 		ret = append(ret, item.key)
 		ptr = item.right
-		if ptr == q.head {
+		if ptr == 0 {
 			break
 		}
 	}
@@ -60,7 +35,7 @@ type queueTestCase struct {
 	elements []string
 }
 
-func TestQueue(t *testing.T) {
+func testQueue(t *testing.T) {
 	q := newList(10)
 
 	testcases := []queueTestCase{
