@@ -1,4 +1,4 @@
-module github.com/pavel-krush/cache
+module github.com/pavel-krush/cache/v2
 
 go 1.16
 
