@@ -1,7 +1,7 @@
 package lru
 
 import (
-	"github.com/pavel-krush/cache/lru/queue"
+	"github.com/pavel-krush/cache/v2/lru/queue"
 	"time"
 )
 

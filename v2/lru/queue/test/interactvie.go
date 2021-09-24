@@ -3,8 +3,9 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/pavel-krush/cache/v2/lru/queue"
 	"os"
+
+	"github.com/pavel-krush/cache/v2/lru/queue"
 )
 
 func main() {
