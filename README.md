@@ -1,64 +1,68 @@
-GO LRU TTL Cache
-================
-This is a simple LRU TTL cache implementation. Cache has limited capacity and keys expire after certain time. 
+# GO LRU TTL Cache 
+Simple LRU cache implementation. All keys have same TTL and cache has limited capacity.
 
-Usage
------
+## Basic usage
 
 ```go
-import "github.com/pavel-krush/cache"
+package main
 
-cache := cache.NewLRU(100000, time.Second * 60)
+import (
+	"fmt"
+	"time"
 
-cache.Set("key", "value")
-value, found := cache.Get("key")
-```
+	"github.com/pavel-krush/cache/v2/lru"
+)
 
-Interface
----------
+func main() {
+	cache := lru.New().WithCapacity(10000).WithTTL(time.Second * 60).Build()
 
-```go
-
-func NewLRU(capacity int, ttl time.Duration) LRUCache
-func NewSyncLRU(capacity int, ttl time.Duration) LRUCache
-
-type LRUCache interface {
-	SetClock(clock Clock) // change clock
-	Exists(key string) bool // check whether key exists in cache
-	Set(key string, value interface{}) // set key-value pair
-	Delete(key string) // delete key from cache
-	Get(key string) (interface{}, bool) // get value from cache
-	TTL(key string) (time.Duration, bool) // get TTL on key
-	Expired() int // get total count of expired elements
-	Evicted() int // get total count of evicted elements
-	UpdateTTL(update bool) // update or not element's ttl on Get()
-
-        // eviction and expiration callbacks
-	OnEvict(func(key string))
-	OnExpire(func(key string))
+	cache.Set("key", "value")
+	value, found := cache.Get("key")
+	fmt.Printf("%s = %s, %t", "key", value, found)
 }
 ```
 
-Thread safety
--------------
+## Build options
+There are several build options that can produce cache with different behaviour:
+- WithCapacity(capacity int). Mandatory. Sets the capacity of the cache;
+- WithTTL(ttl time.Duration). Optional. Set the keys TTL. All keys have same TTL;
+- WithMetrics(namespace string, subsystem string, constLabels []string). Optional. Creates cache with metrics  
+  The following metrics will be registered:  
+  - namespace_subsystem_cache_capacity{constLabels} - Gauge: capacity of the cache.;
+  - namespace_subsystem_cache_hits_total{constLabels} - Counter: amount of cache hits;
+  - namespace_subsystem_cache_misses_total{constLabels} - Counter: amount of cache misses;
+  - namespace_subsystem_cache_evicted_total{constLabels} - Counter: amount of evicted keys;
+  - namespace_subsystem_cache_expired_total{constLabels} - Counter: amount of expired keys.  
+  
+  Metrics are registered on cache creation and de-registered when cache is destroyed via `.Destroy()`.
+- WithSync(). Optional. Creates a concurrent cache.
+- WithDiscreteClock(time.Duration). Optional. Creates a cache with less precise clock.  
+  This option allows to increase performance of `.Get()`.
+- WithEvictCallback(func(string)). Optional. Adds an eviction hook(see below);
+- WithExpireCallback(func(string)). Optional. Adds an expiration hook(see below).
 
-`SyncLRU` is a thread safe version of `LRU` with exact the same interface.
+## Hooks
 
-Benchmarks
-----------
+### Eviction
+Eviction hook is called when a new key is pushed into the full cache. In this case the oldest key will be evicted from the cache. 
+It's okay to create several eviction callbacks.
 
-Benchmark example for my MacBook Pro (13-inch, 2019), 2,4 GHz Quad-Core Intel Core i5:
-```text
-BenchmarkMapNoExpiration-8       	30545750	        36.7 ns/op
-BenchmarkLRUNoExpiration-8       	17854893	        67.1 ns/op
-BenchmarkSyncLRUNoExpiration-8   	11962401	        99.1 ns/op
+### Expiration
+Expire hook is called when key is removed from the cache and its TTL has passed.
+It's not guaranteed that this hook will be called just in time when key is expired.
+It's okay to create several expiration callbacks.
+
+LRU Cache Interface
+---------
+
+```go
+type Cache interface {
+    Capacity() int
+    Exists(key string) bool
+    Set(key string, value interface{})
+    Delete(key string) bool
+    Get(key string) (interface{}, bool)
+    TTL(key string) (time.Duration, bool)
+    Destroy()
+}
 ```
-
-Clock
------
-There are three types of clock:
-- ClockNone - Used for non-expiration cache. Constructor: `NewClockNone()`
-- ClockSimple - High precision clock. It uses time.Now() on each Get(). Constructor: `NewClockSimple()`
-- DiscreteClock - Not as precise as ClockSimple, but significantly faster. Refreshes current time once in 500ms. Default Clock. Constructor: `NewClockDiscrete(time.Duration)`
-
-Clock can be changed via SetClock Method.
