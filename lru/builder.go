@@ -114,7 +114,7 @@ func (b Builder) Build() Cache {
 			b.optMetrics.namespace, b.optMetrics.subsystem, b.optMetrics.constLabels)
 
 		onEvictCallbacks = append(onEvictCallbacks, withMetrics.onEvict)
-		onExpireCallbacks = append(onEvictCallbacks, withMetrics.onExpire)
+		onExpireCallbacks = append(onExpireCallbacks, withMetrics.onExpire)
 
 		ret = withMetrics
 	}
