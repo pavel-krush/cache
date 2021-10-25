@@ -1,12 +1,13 @@
 package lru
 
 import (
-	"github.com/pavel-krush/cache/v2/lru/queue"
 	"time"
+
+	"github.com/pavel-krush/cache/v2/lru/queue"
 )
 
 type base struct {
-	ttl            time.Duration
+	ttl             time.Duration
 	clock           clock
 	expirationQueue *queue.Queue
 

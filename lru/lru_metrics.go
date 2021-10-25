@@ -1,19 +1,20 @@
 package lru
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 // lruWithMetrics is a wrapper for cache that exports prometheus metrics
 type lruWithMetrics struct {
 	parent Cache
 
-	capacityMetric   prometheus.Gauge
-	hitsMetric    prometheus.Counter
-	missesMetric  prometheus.Counter
-	evictedMetric prometheus.Counter
-	expiredMetric prometheus.Counter
+	capacityMetric prometheus.Gauge
+	hitsMetric     prometheus.Counter
+	missesMetric   prometheus.Counter
+	evictedMetric  prometheus.Counter
+	expiredMetric  prometheus.Counter
 }
 
 func newWithMetrics(
@@ -72,11 +73,11 @@ func newWithMetrics(
 	return &lruWithMetrics{
 		parent: parent,
 
-		capacityMetric:   capacity,
-		hitsMetric:    hits,
-		missesMetric:  misses,
-		evictedMetric: evicted,
-		expiredMetric: expired,
+		capacityMetric: capacity,
+		hitsMetric:     hits,
+		missesMetric:   misses,
+		evictedMetric:  evicted,
+		expiredMetric:  expired,
 	}
 }
 

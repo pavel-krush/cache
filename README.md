@@ -41,6 +41,37 @@ There are several build options that can produce cache with different behaviour:
 - WithEvictCallback(func(string)). Optional. Adds an eviction hook(see below);
 - WithExpireCallback(func(string)). Optional. Adds an expiration hook(see below).
 
+## Cache config
+It's possible to build cache from config structure:
+
+```go
+cfg := lru.Config{
+	Capacity:   314,
+	TTL:        42 * time.Second,
+	Concurrent: true,
+	Metrics: &lru.MetricsConfig{
+		Enabled:   true,
+		Namespace: "namespace",
+		Subsystem: "subsystem",
+		Labels: prometheus.Labels{
+			"name": "cache_name",
+		},
+	},
+	Clock: &lru.ClockConfig{
+		Discrete: &lru.ClockConfigDiscrete{UpdateInterval: 500 * time.Millisecond},
+	},
+}
+
+cache := lru.NewFromConfig(cfg).Build()
+```
+
+Only `Capacity` and `TTL` fields are mandatory.
+
+Default values:
+- `Concurrent` false
+- `Metrics` { Enabled: false }
+- `Clock` { Simple: {} }
+
 ## Hooks
 
 ### Eviction

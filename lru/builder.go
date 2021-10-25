@@ -1,8 +1,9 @@
 package lru
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 type Builder struct {
@@ -17,6 +18,29 @@ type Builder struct {
 
 func New() Builder {
 	return Builder{}
+}
+
+func NewFromConfig(cfg *Config) Builder {
+	cfg = cfg.withDefaults()
+
+	ret := New().WithCapacity(cfg.Capacity).
+		WithTTL(cfg.TTL)
+
+	if cfg.Concurrent {
+		ret = ret.WithSync()
+	}
+
+	if cfg.Metrics != nil {
+		ret = ret.WithMetrics(cfg.Metrics.Namespace, cfg.Metrics.Subsystem, cfg.Metrics.Labels)
+	}
+
+	if cfg.Clock != nil {
+		if cfg.Clock.Discrete != nil {
+			ret = ret.WithDiscreteClock(cfg.Clock.Discrete.UpdateInterval)
+		}
+	}
+
+	return ret
 }
 
 func (b Builder) WithCapacity(capacity int) Builder {
@@ -101,7 +125,7 @@ func (b Builder) Build() Cache {
 		baseCache.setClock(newClockNone())
 	} else {
 		if b.optDiscreteClock == nil {
-			baseCache.setClock(newClockSimple())
+			baseCache.setClock(newClockPrecise())
 		} else {
 			baseCache.setClock(newClockDiscrete(b.optDiscreteClock.updateInterval))
 		}

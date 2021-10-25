@@ -1,8 +1,9 @@
 package lru
 
 import (
-	"sync/atomic"
 	"time"
+
+	"sync/atomic"
 )
 
 type clock interface {
@@ -22,19 +23,19 @@ func newClockNone() clock {
 	return &ClockNone{}
 }
 
-// ClockSimple is a default clock. Used for precise expiration
-type ClockSimple struct{}
+// ClockPrecise is a default clock. Used for precise expiration
+type ClockPrecise struct{}
 
-func (c *ClockSimple) Now() time.Time {
+func (c *ClockPrecise) Now() time.Time {
 	return time.Now()
 }
-func (c *ClockSimple) Stop() {}
+func (c *ClockPrecise) Stop() {}
 
-func newClockSimple() clock {
-	return &ClockSimple{}
+func newClockPrecise() clock {
+	return &ClockPrecise{}
 }
 
-// ClockDiscrete is an optimized clock. Not as precise as ClockSimple but significantly faster.
+// ClockDiscrete is an optimized clock. Not as precise as ClockPrecise but significantly faster.
 // Current time is refreshed each 500ms.
 type ClockDiscrete struct {
 	updateTicker *time.Ticker
