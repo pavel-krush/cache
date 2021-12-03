@@ -12,6 +12,8 @@ type Builder struct {
 	optSync            *optionSync
 	optMetrics         *optionMetrics
 	optDiscreteClock   *optionDiscreteClock
+	optSetCallbacks    []*optionSetCallback
+	optDeleteCallbacks []*optionDeleteCallback
 	optEvictCallbacks  []*optionEvictCallback
 	optExpireCallbacks []*optionExpireCallback
 }
@@ -89,6 +91,16 @@ func (b Builder) WithDiscreteClock(updateInterval time.Duration) Builder {
 	return b
 }
 
+func (b Builder) WithSetCallback(cb func(string)) Builder {
+	b.optSetCallbacks = append(b.optSetCallbacks, &optionSetCallback{cb})
+	return b
+}
+
+func (b Builder) WithDeleteCallback(cb func(string)) Builder {
+	b.optDeleteCallbacks = append(b.optDeleteCallbacks, &optionDeleteCallback{cb})
+	return b
+}
+
 func (b Builder) WithEvictCallback(cb func(string)) Builder {
 	b.optEvictCallbacks = append(b.optEvictCallbacks, &optionEvictCallback{cb})
 	return b
@@ -115,6 +127,8 @@ func (b Builder) Build() Cache {
 	}
 
 	var (
+		onSetCallbacks    []func(string)
+		onDeleteCallbacks []func(string)
 		onEvictCallbacks  []func(string)
 		onExpireCallbacks []func(string)
 	)
@@ -155,8 +169,18 @@ func (b Builder) Build() Cache {
 		onExpireCallbacks = append(onExpireCallbacks, b.optExpireCallbacks[i].cb)
 	}
 
+	for i := range b.optSetCallbacks {
+		onSetCallbacks = append(onSetCallbacks, b.optSetCallbacks[i].cb)
+	}
+
+	for i := range b.optDeleteCallbacks {
+		onDeleteCallbacks = append(onDeleteCallbacks, b.optDeleteCallbacks[i].cb)
+	}
+
 	baseCache.onEvict = composeKeyCallback(onEvictCallbacks...)
 	baseCache.onExpire = composeKeyCallback(onExpireCallbacks...)
+	baseCache.onSet = composeKeyCallback(onSetCallbacks...)
+	baseCache.onDelete = composeKeyCallback(onDeleteCallbacks...)
 
 	return ret
 }

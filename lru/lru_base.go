@@ -14,6 +14,8 @@ type base struct {
 	capacity int
 	storage  map[string]*item
 
+	onSet    func(string)
+	onDelete func(string)
 	onEvict  func(string)
 	onExpire func(string)
 }
@@ -38,7 +40,7 @@ func (c *base) Capacity() int {
 }
 
 func (c *base) Exists(key string) bool {
-	return c.storage[key] == nil
+	return c.storage[key] != nil
 }
 
 func (c *base) Set(key string, value interface{}) {
@@ -60,6 +62,10 @@ func (c *base) Set(key string, value interface{}) {
 	}
 
 	c.expirationQueue.Push(key)
+
+	if c.onSet != nil {
+		c.onSet(key)
+	}
 }
 
 func (c *base) Delete(key string) bool {
@@ -69,6 +75,10 @@ func (c *base) Delete(key string) bool {
 
 	c.expirationQueue.Delete(key)
 	delete(c.storage, key)
+
+	if c.onDelete != nil {
+		c.onDelete(key)
+	}
 
 	return true
 }

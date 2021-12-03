@@ -16,6 +16,8 @@ type optionMetrics struct {
 }
 type optionSync struct{}
 type optionDiscreteClock struct{ updateInterval time.Duration }
+type optionSetCallback struct{ cb func(string) }
+type optionDeleteCallback struct{ cb func(string) }
 type optionEvictCallback struct{ cb func(string) }
 type optionExpireCallback struct{ cb func(string) }
 
