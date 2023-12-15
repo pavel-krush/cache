@@ -3,6 +3,7 @@ package lru
 import (
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -64,11 +65,28 @@ func newWithMetrics(
 		ConstLabels: constLabels,
 	})
 
-	prometheus.MustRegister(capacity)
-	prometheus.MustRegister(hits)
-	prometheus.MustRegister(misses)
-	prometheus.MustRegister(evicted)
-	prometheus.MustRegister(expired)
+	var target prometheus.AlreadyRegisteredError
+
+	err := prometheus.Register(capacity)
+	if err != nil && !errors.As(err, &target) {
+		panic(err)
+	}
+	err = prometheus.Register(hits)
+	if err != nil && !errors.As(err, &target) {
+		panic(err)
+	}
+	err = prometheus.Register(misses)
+	if err != nil && !errors.As(err, &target) {
+		panic(err)
+	}
+	err = prometheus.Register(evicted)
+	if err != nil && !errors.As(err, &target) {
+		panic(err)
+	}
+	err = prometheus.Register(expired)
+	if err != nil && !errors.As(err, &target) {
+		panic(err)
+	}
 
 	return &lruWithMetrics{
 		parent: parent,
